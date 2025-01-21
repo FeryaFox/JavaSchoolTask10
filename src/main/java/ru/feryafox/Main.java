@@ -1,12 +1,13 @@
 package ru.feryafox;
 
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class Main {
     private Main() {}
@@ -16,21 +17,14 @@ public final class Main {
 
         List<Integer> numbers = readNumbersFromFile(filePath);
 
-        List<Thread> threads = new ArrayList<>();
+        int threadPoolSize = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
 
         for (int number : numbers) {
-            Thread thread = new Thread(new FactorialTask(number));
-            threads.add(thread);
-            thread.start();
+            executor.execute(new FactorialTask(number));
         }
 
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        executor.shutdown();
     }
 
     public static List<Integer> readNumbersFromFile(String filePath) {
